@@ -1,6 +1,11 @@
 import java.io.File
+import java.util.*
 
-class Updater(private val configFileLocation: String, private val createBackup: Boolean = true) {
+class Updater(
+    private val configFileLocation: String,
+    private val createBackup: Boolean = true,
+    private val dryRun: Boolean = false
+) {
     companion object {
         private const val BACKUP_EXTENSION = "bak"
     }
@@ -10,12 +15,12 @@ class Updater(private val configFileLocation: String, private val createBackup: 
      * @param oldPassword Old password
      * @param newPassword New password
      */
-    fun updateFiles(oldPassword: CharArray, newPassword: CharArray): Feedback {
+    fun updateFiles(username: String, oldPassword: CharArray, newPassword: CharArray): Feedback {
         val status: MutableList<UpdateStatus> = mutableListOf()
 
         // validate passwords
         val passwordValid = validatePassword(oldPassword, newPassword)
-        if(!passwordValid.success) {
+        if (!passwordValid.success) {
             return passwordValid
         }
 
@@ -47,15 +52,26 @@ class Updater(private val configFileLocation: String, private val createBackup: 
                     val originalContent = this.readText()
                     val updatedContent = originalContent.replace(String(oldPassword), String(newPassword))
 
-                    // update the original file when the content changed
-                    if(originalContent == updatedContent) {
+                    // Base64 update
+                    val base64OldPassword = base64Encode(username, oldPassword)
+                    val base64NewPassword = base64Encode(username, newPassword)
+
+                    val base64UpdatedContent = originalContent.replace(base64OldPassword, base64NewPassword)
+
+                    // Check if any changes happened
+                    if ((originalContent == updatedContent) && (originalContent == base64UpdatedContent)) {
                         status.updateStatus(it, false, "Old password not found in file")
                         return@loop
                     }
 
-                    this.writeText(updatedContent)
+                    var reason = ""
+                    // update the original file when the content changed
+                    if(!dryRun) {
+                        this.writeText(updatedContent)
+                        reason = "DRYRUN"
+                    }
 
-                    status.updateStatus(it, true, "")
+                    status.updateStatus(it, true, reason)
                 }
 
             } catch (ex: Exception) {
@@ -65,6 +81,15 @@ class Updater(private val configFileLocation: String, private val createBackup: 
 
         return Feedback(!status.any { !it.success }, "", status)
     }
+
+    /**
+     * Encode username and password to Base64 string
+     */
+    private fun base64Encode(username: String, password: CharArray): String {
+        val usernamePassword = "$username:${String(password)}"
+        return Base64.getEncoder().encodeToString(usernamePassword.toByteArray())
+    }
+
 
     /**
      * Append the result of the current file to the list
@@ -80,11 +105,11 @@ class Updater(private val configFileLocation: String, private val createBackup: 
         val oldPasswordAsString = String(oldPassword)
         val newPasswordAsString = String(newPassword)
 
-        if(oldPasswordAsString.isBlank() || newPasswordAsString.isBlank()) {
+        if (oldPasswordAsString.isBlank() || newPasswordAsString.isBlank()) {
             return Feedback(false, "Password can't be blank", listOf())
         }
 
-        if(oldPasswordAsString == newPasswordAsString) {
+        if (oldPasswordAsString == newPasswordAsString) {
             return Feedback(false, "New password = old password", listOf())
         }
 

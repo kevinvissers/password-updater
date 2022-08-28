@@ -10,6 +10,8 @@ object Main {
     private const val CONFIG_FILE_LOCATION = "config.txt"
     private const val CREATE_BACKUP = true
 
+    private const val USERNAME = "JohnDoe"
+
     @JvmStatic
     fun main(args: Array<String>) {
 
@@ -24,7 +26,7 @@ object Main {
         val updateButton = JButton("Update")
         updateButton.addActionListener {
             val updater = Updater(CONFIG_FILE_LOCATION, createBackup = CREATE_BACKUP)
-            val feedback = updater.updateFiles(oldPasswordField.password, newPasswordField.password)
+            val feedback = updater.updateFiles(USERNAME, oldPasswordField.password, newPasswordField.password)
 
             buildDialog(frame, feedback)
         }
