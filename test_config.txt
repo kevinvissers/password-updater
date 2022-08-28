@@ -1,0 +1,5 @@
+test_files/one_password.txt
+test_files/multiple_passwords.xml
+test_files/no_password.txt
+test_files/base64_password
+test_files/base64_normal_password.txt
