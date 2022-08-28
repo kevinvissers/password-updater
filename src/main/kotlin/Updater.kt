@@ -54,9 +54,11 @@ class Updater(
 
                     // Base64 update
                     val base64OldPassword = base64Encode(username, oldPassword)
+                    // println("old base64 - $base64OldPassword")
                     val base64NewPassword = base64Encode(username, newPassword)
+                    // println("new base64 - $base64NewPassword")
 
-                    val base64UpdatedContent = originalContent.replace(base64OldPassword, base64NewPassword)
+                    val base64UpdatedContent = updatedContent.replace(base64OldPassword, base64NewPassword)
 
                     // Check if any changes happened
                     if ((originalContent == updatedContent) && (originalContent == base64UpdatedContent)) {
@@ -67,7 +69,7 @@ class Updater(
                     var reason = ""
                     // update the original file when the content changed
                     if(!dryRun) {
-                        this.writeText(updatedContent)
+                        this.writeText(base64UpdatedContent)
                         reason = "DRYRUN"
                     }
 

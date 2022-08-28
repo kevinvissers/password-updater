@@ -3,10 +3,16 @@ import java.io.File
 
 class UpdaterTest {
 
+    companion object {
+        private const val JOHN_DOE = "JohnDoe"
+        private const val OLD_PASSWORD = "OldPassword"
+        private const val NEW_PASSWORD = "NewPassword"
+    }
+
     @Test
     fun tryUpdate() {
         val updater = Updater(configFileLocation = "test_config.txt", createBackup = true, dryRun = true)
-        val result = updater.updateFiles("JohnDoe", "OldPassword".toCharArray(), "NewPassword".toCharArray())
+        val result = updater.updateFiles(JOHN_DOE, OLD_PASSWORD.toCharArray(), NEW_PASSWORD.toCharArray())
         println(result)
 
         assert(!result.success)
@@ -38,13 +44,11 @@ class UpdaterTest {
         assert(result.status[4].fileName == "test_files/base64_normal_password.txt")
     }
 
-
     @Test
     fun update() {
         val updater = Updater(configFileLocation = "test_config.txt", createBackup = true, dryRun = false)
-        val result = updater.updateFiles("JohnDoe", "OldPassword".toCharArray(), "NewPassword".toCharArray())
+        val result = updater.updateFiles(JOHN_DOE, OLD_PASSWORD.toCharArray(), NEW_PASSWORD.toCharArray())
         println(result)
-
 
         val files = listOf(
             "test_files/one_password.txt",
@@ -69,5 +73,15 @@ class UpdaterTest {
                 }
             }
         }
+    }
+
+    @Test
+    fun nonExistingConfig() {
+        val updater = Updater(configFileLocation = "test_config_non_existing.txt", createBackup = true, dryRun = true)
+        val result = updater.updateFiles(JOHN_DOE, OLD_PASSWORD.toCharArray(), NEW_PASSWORD.toCharArray())
+        println(result)
+        assert(!result.success)
+        assert(result.message == "Config file test_config_non_existing.txt does not exist")
+        assert(result.status == listOf<String>())
     }
 }
