@@ -28,3 +28,7 @@ test*.txt
 test*.txt.*
 
 .gradle
+
+test_files
+test_files/
+
