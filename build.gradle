@@ -16,3 +16,7 @@ dependencies {
     testImplementation group: 'org.testng', name: 'testng', version: '7.6.1'
 
 }
+
+test {
+    useTestNG()
+}
