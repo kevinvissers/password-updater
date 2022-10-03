@@ -35,6 +35,6 @@ jobs:
         distribution: 'temurin'
 
     - name: Build with Gradle
-      uses: gradle/gradle-build-action@cd579d970f8aec1cf0cae5f62a8e418768970015
+      uses: gradle/gradle-build-action@fd32ae908111fe31afa48827bd1ee909540aa971
       with:
         arguments: clean build test
